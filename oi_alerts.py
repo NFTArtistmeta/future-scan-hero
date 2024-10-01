@@ -10,15 +10,27 @@ exchange = ccxt.binance({
     }
 })
 
-def fetch_all_perpetual_pairs():
-    try:
-        markets = exchange.load_markets()
-        perpetual_pairs = [symbol for symbol, market in markets.items() if market['future'] and market['linear']]
-        print(f"Fetched {len(perpetual_pairs)} perpetual contract pairs")
-        return perpetual_pairs
-    except Exception as e:
-        print(f"Error fetching perpetual pairs: {e}")
-        return []
+trading_pairs = [
+    'BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'ETCUSDT', 'LTCUSDT', 'XRPUSDT',
+    'FETUSDT', 'BNBUSDT', 'ALGOUSDT', 'DOGEUSDT', 'CKBUSDT', 'QTUMUSDT',
+    'COMPUSDT', 'XTZUSDT', 'ADAUSDT', 'LINKUSDT', 'DOTUSDT', 'UNIUSDT',
+    'FILUSDT', 'EOSUSDT', 'TRXUSDT', 'GMTUSDT', 'APEUSDT', 'KNCUSDT',
+    'GTCUSDT', 'XLMUSDT', 'XMRUSDT', 'VETUSDT', 'NEOUSDT', 'THETAUSDT',
+    'ZILUSDT', 'ZRXUSDT', 'KAVAUSDT', 'BANDUSDT', 'MKRUSDT', 'SNXUSDT',
+    'BALUSDT', 'CRVUSDT', 'TRBUSDT', 'SUSHIUSDT', 'EGLDUSDT', 'SOLUSDT',
+    'STORJUSDT', 'AVAXUSDT', 'FTMUSDT', 'FLMUSDT', 'KSMUSDT', 'NEARUSDT',
+    'AAVEUSDT', 'RSRUSDT', 'LRCUSDT', 'BELUSDT', 'AXSUSDT', 'GRTUSDT',
+    '1INCHUSDT', 'CHZUSDT', 'SANDUSDT', 'LITUSDT', 'UNFIUSDT', 'REEFUSDT',
+    'RVNUSDT', 'MANAUSDT', 'OGNUSDT', 'NKNUSDT', '1000SHIBUSDT', 'ICPUSDT',
+    'BAKEUSDT', 'TLMUSDT', 'C98USDT', 'MASKUSDT', 'DYDXUSDT', 'GALAUSDT',
+    'ARUSDT', 'ARPUSDT', 'ENSUSDT', 'PEOPLEUSDT', 'ROSEUSDT', 'ATOMUSDT',
+    'JASMYUSDT', 'DARUSDT', 'OPUSDT', '1000LUNCUSDT', 'LUNA2USDT', 'FLOWUSDT',
+    'STGUSDT', 'APTUSDT', 'QNTUSDT', 'INJUSDT', 'LDOUSDT', 'HOOKUSDT',
+    'MAGICUSDT', 'STXUSDT', 'ACHUSDT', 'SSVUSDT', 'USDCUSDT', 'FLOKIUSDT',
+    'ARBUSDT', 'IDUSDT', 'JOEUSDT', 'AMBUSDT', 'LEVERUSDT', 'BLURUSDT',
+    'SUIUSDT', '1000PEPEUSDT', 'ORDIUSDT', 'WOOUSDT', 'WLDUSDT', 'PENDLEUSDT',
+    'AGLDUSDT', 'ARKMUSDT', 'HIGHUSDT'
+]
 
 def fetch_oi_data(symbol):
     try:
@@ -40,12 +52,11 @@ def detect_oi_change(symbol, previous_oi, current_oi, threshold=0.05):
     return False
 
 def main():
-    pairs = fetch_all_perpetual_pairs()
-    print(f"Monitoring {len(pairs)} perpetual contract pairs")
-    previous_oi = {pair: None for pair in pairs}
+    print(f"Monitoring {len(trading_pairs)} trading pairs")
+    previous_oi = {pair: None for pair in trading_pairs}
     
     while True:
-        for pair in pairs:
+        for pair in trading_pairs:
             current_oi = fetch_oi_data(pair)
             if detect_oi_change(pair, previous_oi[pair], current_oi):
                 previous_oi[pair] = current_oi
