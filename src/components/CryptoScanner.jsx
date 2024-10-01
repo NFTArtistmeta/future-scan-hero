@@ -20,10 +20,10 @@ const fetchCryptoData = async () => {
 const calculatePositions = (price, volatility) => {
   const longEntry = price;
   const shortEntry = price;
-  const takeProfitLong = price * (1 + volatility * 3);
-  const stopLossLong = price * (1 - volatility * 1.5);
-  const takeProfitShort = price * (1 - volatility * 3);
-  const stopLossShort = price * (1 + volatility * 1.5);
+  const takeProfitLong = price * (1 + volatility * 10);  // Increased multiplier
+  const stopLossLong = price * (1 - volatility * 5);     // Increased multiplier
+  const takeProfitShort = price * (1 - volatility * 10); // Increased multiplier
+  const stopLossShort = price * (1 + volatility * 5);    // Increased multiplier
 
   return {
     longEntry: longEntry.toFixed(4),
