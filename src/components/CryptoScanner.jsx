@@ -4,25 +4,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 
 const fetchCryptoData = async () => {
-  // This is a mock API call. In a real application, you'd fetch from an actual API
+  // This is a mock API call. In a real application, you'd fetch from Binance API
   await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-  return [
-    { symbol: 'BTC/USDT', price: 50000, longInterest: 60, shortInterest: 40 },
-    { symbol: 'ETH/USDT', price: 3000, longInterest: 55, shortInterest: 45 },
-    { symbol: 'SOL/USDT', price: 100, longInterest: 70, shortInterest: 30 },
-    { symbol: 'ADA/USDT', price: 1.5, longInterest: 45, shortInterest: 55 },
-    { symbol: 'DOT/USDT', price: 20, longInterest: 50, shortInterest: 50 },
-    { symbol: 'XRP/USDT', price: 0.75, longInterest: 52, shortInterest: 48 },
-    { symbol: 'DOGE/USDT', price: 0.1, longInterest: 65, shortInterest: 35 },
-    { symbol: 'LINK/USDT', price: 15, longInterest: 58, shortInterest: 42 },
-    { symbol: 'UNI/USDT', price: 5, longInterest: 53, shortInterest: 47 },
-    { symbol: 'AVAX/USDT', price: 80, longInterest: 62, shortInterest: 38 },
-    { symbol: 'MATIC/USDT', price: 1.2, longInterest: 57, shortInterest: 43 },
-    { symbol: 'ATOM/USDT', price: 25, longInterest: 54, shortInterest: 46 },
-    { symbol: 'LTC/USDT', price: 150, longInterest: 51, shortInterest: 49 },
-    { symbol: 'FTM/USDT', price: 0.5, longInterest: 59, shortInterest: 41 },
-    { symbol: 'ALGO/USDT', price: 0.3, longInterest: 56, shortInterest: 44 },
+  
+  // Generate a large list of Binance perpetual futures pairs
+  const pairs = [
+    'BTC', 'ETH', 'BNB', 'ADA', 'XRP', 'DOT', 'UNI', 'LTC', 'LINK', 'BCH', 'MATIC',
+    'XLM', 'ETC', 'ALGO', 'ATOM', 'ICP', 'TRX', 'EOS', 'FIL', 'XMR', 'AAVE', 'LUNA',
+    'CAKE', 'AVAX', 'FTT', 'DOGE', 'SOL', 'RUNE', 'SUSHI', 'CHZ', 'COMP', 'THETA',
+    'VET', 'AXS', 'NEO', 'MKR', 'KSM', 'FTM', 'WAVES', 'ICX', 'DASH', 'ZEC', 'XTZ',
+    'ENJ', 'EGLD', 'NEAR', 'BAT', 'HNT', 'ZIL', 'DGB', 'YFI', 'QTUM', 'ONT', 'ZRX',
+    'IOTA', 'BTT', 'RVN', 'MANA', 'HBAR', 'HOT', 'NANO', 'OMG', 'CRV', 'SAND', 'ANKR'
   ];
+
+  return pairs.map(symbol => ({
+    symbol: `${symbol}/USDT`,
+    price: +(Math.random() * 10000).toFixed(2),
+    longInterest: +(Math.random() * 100).toFixed(2),
+    shortInterest: +(Math.random() * 100).toFixed(2),
+    takeProfit: +(Math.random() * 20 + 1).toFixed(2), // 1-21% range
+    stopLoss: +(Math.random() * 10 + 1).toFixed(2), // 1-11% range
+  }));
 };
 
 const CryptoScanner = () => {
@@ -36,7 +38,7 @@ const CryptoScanner = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Crypto Perpetual Futures Scanner</h2>
+      <h2 className="text-2xl font-bold mb-4">Binance Perpetual Futures Scanner</h2>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -45,6 +47,8 @@ const CryptoScanner = () => {
               <TableHead>Price</TableHead>
               <TableHead>Long Interest</TableHead>
               <TableHead>Short Interest</TableHead>
+              <TableHead>Take Profit</TableHead>
+              <TableHead>Stop Loss</TableHead>
               <TableHead>Dominant Position</TableHead>
             </TableRow>
           </TableHeader>
@@ -55,6 +59,8 @@ const CryptoScanner = () => {
                 <TableCell>${crypto.price.toLocaleString()}</TableCell>
                 <TableCell>{crypto.longInterest}%</TableCell>
                 <TableCell>{crypto.shortInterest}%</TableCell>
+                <TableCell>{crypto.takeProfit}%</TableCell>
+                <TableCell>{crypto.stopLoss}%</TableCell>
                 <TableCell>
                   {crypto.longInterest > crypto.shortInterest ? (
                     <span className="text-green-500 flex items-center">
