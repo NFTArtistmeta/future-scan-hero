@@ -13,7 +13,7 @@ export const fetchBinanceData = async () => {
 export const fetchBybitData = async () => {
   try {
     const response = await axios.get('https://api.bybit.com/v5/market/tickers?category=linear');
-    console.log('Bybit raw data:', response.data);
+    console.log('Bybit raw data:', response.data); // Add this line for debugging
     if (response.data && response.data.result && response.data.result.list) {
       return response.data.result.list.map(item => ({ 
         symbol: item.symbol,
@@ -35,13 +35,13 @@ export const fetchBybitData = async () => {
 export const fetchMEXCData = async () => {
   try {
     const response = await axios.get('https://contract.mexc.com/api/v1/contract/ticker');
-    console.log('MEXC raw data:', response.data);
+    console.log('MEXC raw data:', response.data); // Add this line for debugging
     if (response.data && response.data.data) {
       return response.data.data.map(item => ({
         symbol: item.symbol,
         lastPrice: item.last,
-        priceChangePercent: (parseFloat(item.riseFallRate) * 100).toFixed(2),
-        volume: item.volume24,
+        priceChangePercent: item.percentage,
+        volume: item.volume,
         exchange: 'MEXC'
       }));
     } else {
@@ -49,8 +49,7 @@ export const fetchMEXCData = async () => {
       return [];
     }
   } catch (error) {
-    console.error('Error fetching MEXC data:', error.message);
-    console.error('Error details:', error.response ? error.response.data : 'No response data');
+    console.error('Error fetching MEXC data:', error);
     return [];
   }
 };
