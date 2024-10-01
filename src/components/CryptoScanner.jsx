@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 
 const fetchCryptoData = async () => {
-  const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
+  const response = await fetch('https://api.binance.com/api/v3/ticker/24hr');
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
@@ -21,6 +21,12 @@ const CryptoScanner = () => {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
+  // Filter for USDT pairs and sort by volume
+  const filteredData = data
+    ?.filter(crypto => crypto.symbol.endsWith('USDT'))
+    .sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume))
+    .slice(0, 100); // Top 100 by volume
+
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Cryptocurrency Market Scanner</h2>
@@ -31,27 +37,25 @@ const CryptoScanner = () => {
               <TableHead>Symbol</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>24h Change</TableHead>
-              <TableHead>Market Cap</TableHead>
+              <TableHead>Volume</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data && data.map((crypto) => (
-              <TableRow key={crypto.id}>
-                <TableCell>{crypto.symbol.toUpperCase()}</TableCell>
-                <TableCell>${crypto.current_price?.toLocaleString() ?? 'N/A'}</TableCell>
+            {filteredData && filteredData.map((crypto) => (
+              <TableRow key={crypto.symbol}>
+                <TableCell>{crypto.symbol.replace('USDT', '')}</TableCell>
+                <TableCell>${parseFloat(crypto.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                 <TableCell>
-                  {crypto.price_change_percentage_24h ? (
-                    <span className={crypto.price_change_percentage_24h > 0 ? "text-green-500" : "text-red-500"}>
-                      {crypto.price_change_percentage_24h > 0 ? (
-                        <ArrowUpIcon className="inline mr-1 h-4 w-4" />
-                      ) : (
-                        <ArrowDownIcon className="inline mr-1 h-4 w-4" />
-                      )}
-                      {crypto.price_change_percentage_24h.toFixed(2)}%
-                    </span>
-                  ) : 'N/A'}
+                  <span className={parseFloat(crypto.priceChangePercent) > 0 ? "text-green-500" : "text-red-500"}>
+                    {parseFloat(crypto.priceChangePercent) > 0 ? (
+                      <ArrowUpIcon className="inline mr-1 h-4 w-4" />
+                    ) : (
+                      <ArrowDownIcon className="inline mr-1 h-4 w-4" />
+                    )}
+                    {parseFloat(crypto.priceChangePercent).toFixed(2)}%
+                  </span>
                 </TableCell>
-                <TableCell>${crypto.market_cap?.toLocaleString() ?? 'N/A'}</TableCell>
+                <TableCell>${parseFloat(crypto.volume).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
               </TableRow>
             ))}
           </TableBody>
