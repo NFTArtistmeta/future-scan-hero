@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 import time
+import asyncio
 
 class ScalpingStrategy:
     def __init__(self, symbol, timeframe='1m', ema_short=10, ema_long=20, rsi_period=14, rsi_overbought=70, rsi_oversold=30):
@@ -20,11 +21,15 @@ class ScalpingStrategy:
         self.rsi_overbought = rsi_overbought
         self.rsi_oversold = rsi_oversold
 
-    def fetch_ohlcv(self):
-        ohlcv = self.exchange.fetch_ohlcv(self.symbol, self.timeframe, limit=100)
-        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-        return df
+    async def fetch_ohlcv(self):
+        try:
+            ohlcv = await self.exchange.fetch_ohlcv(self.symbol, self.timeframe, limit=100)
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            return df
+        except Exception as e:
+            print(f"Error fetching data for {self.symbol}: {e}")
+            return None
 
     def calculate_indicators(self, df):
         df['ema_short'] = df['close'].ewm(span=self.ema_short, adjust=False).mean()
@@ -51,22 +56,48 @@ class ScalpingStrategy:
             print(f"[{datetime.now()}] Opening short position for {self.symbol}")
             # Implement your short position logic here
 
-    def run(self):
+    async def run(self):
         while True:
             try:
-                df = self.fetch_ohlcv()
-                df = self.calculate_indicators(df)
-                df = self.generate_signals(df)
+                df = await self.fetch_ohlcv()
+                if df is not None:
+                    df = self.calculate_indicators(df)
+                    df = self.generate_signals(df)
+                    
+                    last_row = df.iloc[-1]
+                    if last_row['signal'] != 0:
+                        self.execute_trade(last_row['signal'])
                 
-                last_row = df.iloc[-1]
-                if last_row['signal'] != 0:
-                    self.execute_trade(last_row['signal'])
-                
-                time.sleep(60)  # Wait for 1 minute before next iteration
+                await asyncio.sleep(60)  # Wait for 1 minute before next iteration
             except Exception as e:
-                print(f"An error occurred: {e}")
-                time.sleep(60)  # Wait for 1 minute before retrying
+                print(f"An error occurred for {self.symbol}: {e}")
+                await asyncio.sleep(60)  # Wait for 1 minute before retrying
+
+async def run_strategies(trading_pairs):
+    strategies = [ScalpingStrategy(symbol) for symbol in trading_pairs]
+    await asyncio.gather(*[strategy.run() for strategy in strategies])
 
 if __name__ == "__main__":
-    strategy = ScalpingStrategy(symbol="BTC/USDT")
-    strategy.run()
+    trading_pairs = [
+        'BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'ETCUSDT', 'LTCUSDT', 'XRPUSDT',
+        'FETUSDT', 'BNBUSDT', 'ALGOUSDT', 'DOGEUSDT', 'CKBUSDT', 'QTUMUSDT',
+        'COMPUSDT', 'XTZUSDT', 'ADAUSDT', 'LINKUSDT', 'DOTUSDT', 'UNIUSDT',
+        'FILUSDT', 'EOSUSDT', 'TRXUSDT', 'GMTUSDT', 'APEUSDT', 'KNCUSDT',
+        'GTCUSDT', 'XLMUSDT', 'XMRUSDT', 'VETUSDT', 'NEOUSDT', 'THETAUSDT',
+        'ZILUSDT', 'ZRXUSDT', 'KAVAUSDT', 'BANDUSDT', 'MKRUSDT', 'SNXUSDT',
+        'BALUSDT', 'CRVUSDT', 'TRBUSDT', 'SUSHIUSDT', 'EGLDUSDT', 'SOLUSDT',
+        'STORJUSDT', 'AVAXUSDT', 'FTMUSDT', 'FLMUSDT', 'KSMUSDT', 'NEARUSDT',
+        'AAVEUSDT', 'RSRUSDT', 'LRCUSDT', 'BELUSDT', 'AXSUSDT', 'GRTUSDT',
+        '1INCHUSDT', 'CHZUSDT', 'SANDUSDT', 'LITUSDT', 'UNFIUSDT', 'REEFUSDT',
+        'RVNUSDT', 'MANAUSDT', 'OGNUSDT', 'NKNUSDT', '1000SHIBUSDT', 'ICPUSDT',
+        'BAKEUSDT', 'TLMUSDT', 'C98USDT', 'MASKUSDT', 'DYDXUSDT', 'GALAUSDT',
+        'ARUSDT', 'ARPUSDT', 'ENSUSDT', 'PEOPLEUSDT', 'ROSEUSDT', 'ATOMUSDT',
+        'JASMYUSDT', 'DARUSDT', 'OPUSDT', '1000LUNCUSDT', 'LUNA2USDT', 'FLOWUSDT',
+        'STGUSDT', 'APTUSDT', 'QNTUSDT', 'INJUSDT', 'LDOUSDT', 'HOOKUSDT',
+        'MAGICUSDT', 'STXUSDT', 'ACHUSDT', 'SSVUSDT', 'USDCUSDT', 'FLOKIUSDT',
+        'ARBUSDT', 'IDUSDT', 'JOEUSDT', 'AMBUSDT', 'LEVERUSDT', 'BLURUSDT',
+        'SUIUSDT', '1000PEPEUSDT', 'ORDIUSDT', 'WOOUSDT', 'WLDUSDT', 'PENDLEUSDT',
+        'AGLDUSDT', 'ARKMUSDT', 'HIGHUSDT'
+    ]
+    
+    asyncio.run(run_strategies(trading_pairs))
