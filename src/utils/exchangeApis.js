@@ -31,3 +31,19 @@ export const fetchBybitData = async () => {
     return [];
   }
 };
+
+export const fetchBitcoinHistoricalData = async () => {
+  try {
+    const response = await axios.get('https://api.binance.com/api/v3/klines', {
+      params: {
+        symbol: 'BTCUSDT',
+        interval: '1h',
+        limit: 168 // Last 7 days (24 * 7)
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Bitcoin historical data:', error);
+    throw error;
+  }
+};

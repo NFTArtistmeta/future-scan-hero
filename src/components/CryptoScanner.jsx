@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 import { fetchBinanceData, fetchBybitData } from '../utils/exchangeApis';
+import BitcoinHeatmap from './BitcoinHeatmap';
 
 const calculatePositions = (price, volatility) => {
   const longEntry = price;
@@ -117,6 +118,7 @@ const CryptoScanner = () => {
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Cryptocurrency Futures Scanner</h2>
+      <BitcoinHeatmap />
       <ExchangeTable data={data?.binance} exchangeName="Binance" />
       <ExchangeTable data={data?.bybit} exchangeName="Bybit" />
     </div>
