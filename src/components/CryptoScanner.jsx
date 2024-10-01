@@ -3,12 +3,37 @@ import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 
+const BINANCE_API_KEY = 'ZCMU75SbcFqoGQQoskQ7M5JUYbpsUKga91wRItyHls6lfUs9nKaDYPaxZZ65x8Xg';
+const BINANCE_SECRET_KEY = 'LGj016u8xjgEpraotzJ2PgpDbR4yHheXAesOoFScGzmTNOZZKrbT4Z9o4qZMxfXw';
+
 const fetchCryptoData = async () => {
-  const response = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+  const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr', {
+    headers: {
+      'X-MBX-APIKEY': BINANCE_API_KEY
+    }
+  });
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
   return response.json();
+};
+
+const calculatePositions = (price, volatility) => {
+  const longEntry = price;
+  const shortEntry = price;
+  const takeProfitLong = price * (1 + volatility * 2);
+  const stopLossLong = price * (1 - volatility);
+  const takeProfitShort = price * (1 - volatility * 2);
+  const stopLossShort = price * (1 + volatility);
+
+  return {
+    longEntry: longEntry.toFixed(2),
+    shortEntry: shortEntry.toFixed(2),
+    takeProfitLong: takeProfitLong.toFixed(2),
+    stopLossLong: stopLossLong.toFixed(2),
+    takeProfitShort: takeProfitShort.toFixed(2),
+    stopLossShort: stopLossShort.toFixed(2),
+  };
 };
 
 const CryptoScanner = () => {
@@ -33,7 +58,7 @@ const CryptoScanner = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Cryptocurrency Market Scanner</h2>
+      <h2 className="text-2xl font-bold mb-4">Cryptocurrency Futures Scanner</h2>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -42,26 +67,44 @@ const CryptoScanner = () => {
               <TableHead>Price</TableHead>
               <TableHead>24h Change</TableHead>
               <TableHead>Volume</TableHead>
+              <TableHead>Long Entry</TableHead>
+              <TableHead>Short Entry</TableHead>
+              <TableHead>TP Long</TableHead>
+              <TableHead>SL Long</TableHead>
+              <TableHead>TP Short</TableHead>
+              <TableHead>SL Short</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.map((crypto) => (
-              <TableRow key={crypto.symbol}>
-                <TableCell>{crypto.symbol.replace('USDT', '')}</TableCell>
-                <TableCell>${parseFloat(crypto.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                <TableCell>
-                  <span className={parseFloat(crypto.priceChangePercent) > 0 ? "text-green-500" : "text-red-500"}>
-                    {parseFloat(crypto.priceChangePercent) > 0 ? (
-                      <ArrowUpIcon className="inline mr-1 h-4 w-4" />
-                    ) : (
-                      <ArrowDownIcon className="inline mr-1 h-4 w-4" />
-                    )}
-                    {parseFloat(crypto.priceChangePercent).toFixed(2)}%
-                  </span>
-                </TableCell>
-                <TableCell>${parseFloat(crypto.volume).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
-              </TableRow>
-            ))}
+            {filteredData.map((crypto) => {
+              const price = parseFloat(crypto.lastPrice);
+              const volatility = Math.abs(parseFloat(crypto.priceChangePercent) / 100);
+              const positions = calculatePositions(price, volatility);
+
+              return (
+                <TableRow key={crypto.symbol}>
+                  <TableCell>{crypto.symbol.replace('USDT', '')}</TableCell>
+                  <TableCell>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                  <TableCell>
+                    <span className={parseFloat(crypto.priceChangePercent) > 0 ? "text-green-500" : "text-red-500"}>
+                      {parseFloat(crypto.priceChangePercent) > 0 ? (
+                        <ArrowUpIcon className="inline mr-1 h-4 w-4" />
+                      ) : (
+                        <ArrowDownIcon className="inline mr-1 h-4 w-4" />
+                      )}
+                      {parseFloat(crypto.priceChangePercent).toFixed(2)}%
+                    </span>
+                  </TableCell>
+                  <TableCell>${parseFloat(crypto.volume).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                  <TableCell>${positions.longEntry}</TableCell>
+                  <TableCell>${positions.shortEntry}</TableCell>
+                  <TableCell>${positions.takeProfitLong}</TableCell>
+                  <TableCell>${positions.stopLossLong}</TableCell>
+                  <TableCell>${positions.takeProfitShort}</TableCell>
+                  <TableCell>${positions.stopLossShort}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
