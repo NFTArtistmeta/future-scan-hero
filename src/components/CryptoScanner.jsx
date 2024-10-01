@@ -39,7 +39,7 @@ const CryptoScanner = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['cryptoData'],
     queryFn: fetchCryptoData,
-    refetchInterval: 30000, // Updated to 30 seconds (30000 milliseconds)
+    refetchInterval: 30000, // Fetch every 30 seconds
   });
 
   if (isLoading) return <div className="text-center py-10">Loading cryptocurrency data...</div>;
@@ -92,8 +92,8 @@ const CryptoScanner = () => {
                     </span>
                   </TableCell>
                   <TableCell>${parseFloat(crypto.volume).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
-                  <TableCell>${positions.longEntry}</TableCell>
-                  <TableCell>${positions.shortEntry}</TableCell>
+                  <TableCell className="text-green-500">${positions.longEntry}</TableCell>
+                  <TableCell className="text-red-500">${positions.shortEntry}</TableCell>
                   <TableCell>${positions.takeProfitLong}</TableCell>
                   <TableCell>${positions.stopLossLong}</TableCell>
                   <TableCell>${positions.takeProfitShort}</TableCell>
