@@ -41,7 +41,16 @@ const fetchAllData = async () => {
 };
 
 const ExchangeTable = ({ data, exchangeName }) => {
-  const sortedData = data.sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
+  if (!data || data.length === 0) {
+    return (
+      <div className="mb-8">
+        <h3 className="text-xl font-bold mb-4">{exchangeName}</h3>
+        <p>No data available for {exchangeName}.</p>
+      </div>
+    );
+  }
+
+  const sortedData = [...data].sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
 
   return (
     <div className="mb-8">
@@ -107,7 +116,7 @@ const CryptoScanner = () => {
   if (isLoading) return <div className="text-center py-10">Loading cryptocurrency data...</div>;
   if (error) return <div className="text-center py-10 text-red-500">Error: {error.message}</div>;
 
-  if (!data || (data.binance.length === 0 && data.bybit.length === 0 && data.mexc.length === 0)) {
+  if (!data) {
     return <div className="text-center py-10">No cryptocurrency data available.</div>;
   }
 
