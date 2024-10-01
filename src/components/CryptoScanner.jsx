@@ -18,14 +18,18 @@ const CryptoScanner = () => {
     refetchInterval: 60000, // Refetch every 60 seconds
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) return <div className="text-center py-10">Loading cryptocurrency data...</div>;
+  if (error) return <div className="text-center py-10 text-red-500">Error: {error.message}</div>;
 
   // Filter for USDT pairs and sort by volume
   const filteredData = data
     ?.filter(crypto => crypto.symbol.endsWith('USDT'))
     .sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume))
     .slice(0, 100); // Top 100 by volume
+
+  if (!filteredData || filteredData.length === 0) {
+    return <div className="text-center py-10">No cryptocurrency data available.</div>;
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -41,7 +45,7 @@ const CryptoScanner = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData && filteredData.map((crypto) => (
+            {filteredData.map((crypto) => (
               <TableRow key={crypto.symbol}>
                 <TableCell>{crypto.symbol.replace('USDT', '')}</TableCell>
                 <TableCell>${parseFloat(crypto.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
