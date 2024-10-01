@@ -59,14 +59,14 @@ const CryptoScanner = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((crypto) => (
+            {data && data.map((crypto) => (
               <TableRow key={crypto.symbol}>
                 <TableCell>{crypto.symbol}</TableCell>
-                <TableCell>${crypto.price.toLocaleString()}</TableCell>
-                <TableCell>{crypto.longInterest}%</TableCell>
-                <TableCell>{crypto.shortInterest}%</TableCell>
-                <TableCell>${crypto.takeProfit.toLocaleString()}</TableCell>
-                <TableCell>${crypto.stopLoss.toLocaleString()}</TableCell>
+                <TableCell>${crypto.price?.toLocaleString() ?? 'N/A'}</TableCell>
+                <TableCell>{crypto.longInterest?.toFixed(2) ?? 'N/A'}%</TableCell>
+                <TableCell>{crypto.shortInterest?.toFixed(2) ?? 'N/A'}%</TableCell>
+                <TableCell>${crypto.takeProfit?.toLocaleString() ?? 'N/A'}</TableCell>
+                <TableCell>${crypto.stopLoss?.toLocaleString() ?? 'N/A'}</TableCell>
                 <TableCell>
                   {crypto.longInterest > crypto.shortInterest ? (
                     <span className="text-green-500 flex items-center">
