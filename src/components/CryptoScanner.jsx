@@ -45,7 +45,7 @@ const ExchangeTable = ({ data, exchangeName }) => {
     return (
       <div className="mb-8">
         <h3 className="text-xl font-bold mb-4">{exchangeName}</h3>
-        <p>No data available for {exchangeName}.</p>
+        <p>No data available for {exchangeName}. Please check the console for error messages.</p>
       </div>
     );
   }
@@ -116,16 +116,12 @@ const CryptoScanner = () => {
   if (isLoading) return <div className="text-center py-10">Loading cryptocurrency data...</div>;
   if (error) return <div className="text-center py-10 text-red-500">Error: {error.message}</div>;
 
-  if (!data) {
-    return <div className="text-center py-10">No cryptocurrency data available.</div>;
-  }
-
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Cryptocurrency Futures Scanner</h2>
-      <ExchangeTable data={data.binance} exchangeName="Binance" />
-      <ExchangeTable data={data.bybit} exchangeName="Bybit" />
-      <ExchangeTable data={data.mexc} exchangeName="MEXC" />
+      <ExchangeTable data={data?.binance} exchangeName="Binance" />
+      <ExchangeTable data={data?.bybit} exchangeName="Bybit" />
+      <ExchangeTable data={data?.mexc} exchangeName="MEXC" />
     </div>
   );
 };
