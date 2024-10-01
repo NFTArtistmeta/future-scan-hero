@@ -2,13 +2,21 @@ import ccxt
 import time
 from datetime import datetime
 
-# Initialize the exchange (using Binance as an example)
+# Initialize the exchange (Binance)
 exchange = ccxt.binance({
     'enableRateLimit': True,
     'options': {
         'defaultType': 'future'  # Use futures market
     }
 })
+
+def fetch_all_perpetual_pairs():
+    try:
+        markets = exchange.load_markets()
+        return [symbol for symbol, market in markets.items() if market['future'] and market['linear']]
+    except Exception as e:
+        print(f"Error fetching perpetual pairs: {e}")
+        return []
 
 def fetch_oi_data(symbol):
     try:
@@ -30,14 +38,15 @@ def detect_oi_change(symbol, previous_oi, current_oi, threshold=0.05):
     return False
 
 def main():
-    symbols = ['BTC/USDT:USDT', 'ETH/USDT:USDT', 'SOL/USDT:USDT']  # Add more symbols as needed
-    previous_oi = {symbol: None for symbol in symbols}
+    pairs = fetch_all_perpetual_pairs()
+    print(f"Monitoring {len(pairs)} perpetual contract pairs")
+    previous_oi = {pair: None for pair in pairs}
     
     while True:
-        for symbol in symbols:
-            current_oi = fetch_oi_data(symbol)
-            if detect_oi_change(symbol, previous_oi[symbol], current_oi):
-                previous_oi[symbol] = current_oi
+        for pair in pairs:
+            current_oi = fetch_oi_data(pair)
+            if detect_oi_change(pair, previous_oi[pair], current_oi):
+                previous_oi[pair] = current_oi
         
         time.sleep(60)  # Wait for 1 minute before next check
 
