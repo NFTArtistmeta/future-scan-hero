@@ -1,8 +1,7 @@
-import ccxt
+import ccxt.async_support as ccxt
 import numpy as np
 import pandas as pd
 from datetime import datetime
-import time
 import asyncio
 
 class ScalpingStrategy:
@@ -48,7 +47,7 @@ class ScalpingStrategy:
         df['signal'] = np.where((df['ema_short'] < df['ema_long']) & (df['rsi'] > self.rsi_overbought), -1, df['signal'])
         return df
 
-    def execute_trade(self, signal):
+    async def execute_trade(self, signal):
         if signal == 1:
             print(f"[{datetime.now()}] Opening long position for {self.symbol}")
             # Implement your long position logic here
@@ -66,7 +65,7 @@ class ScalpingStrategy:
                     
                     last_row = df.iloc[-1]
                     if last_row['signal'] != 0:
-                        self.execute_trade(last_row['signal'])
+                        await self.execute_trade(last_row['signal'])
                 
                 await asyncio.sleep(60)  # Wait for 1 minute before next iteration
             except Exception as e:
