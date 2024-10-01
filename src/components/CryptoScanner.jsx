@@ -23,12 +23,17 @@ const calculatePositions = (price, volatility) => {
 };
 
 const fetchAllData = async () => {
-  const [binanceData, bybitData, mexcData] = await Promise.all([
-    fetchBinanceData(),
-    fetchBybitData(),
-    fetchMEXCData()
-  ]);
-  return [...binanceData, ...bybitData, ...mexcData];
+  try {
+    const [binanceData, bybitData, mexcData] = await Promise.all([
+      fetchBinanceData(),
+      fetchBybitData(),
+      fetchMEXCData()
+    ]);
+    return [...binanceData, ...bybitData, ...mexcData];
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return [];
+  }
 };
 
 const CryptoScanner = () => {
