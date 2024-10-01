@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
-import { fetchBinanceData, fetchBybitData, fetchMEXCData } from '../utils/exchangeApis';
+import { fetchBinanceData, fetchBybitData } from '../utils/exchangeApis';
 
 const calculatePositions = (price, volatility) => {
   const longEntry = price;
@@ -24,19 +24,17 @@ const calculatePositions = (price, volatility) => {
 
 const fetchAllData = async () => {
   try {
-    const [binanceData, bybitData, mexcData] = await Promise.all([
+    const [binanceData, bybitData] = await Promise.all([
       fetchBinanceData(),
-      fetchBybitData(),
-      fetchMEXCData()
+      fetchBybitData()
     ]);
     return {
       binance: binanceData,
-      bybit: bybitData,
-      mexc: mexcData
+      bybit: bybitData
     };
   } catch (error) {
     console.error('Error fetching data:', error);
-    return { binance: [], bybit: [], mexc: [] };
+    return { binance: [], bybit: [] };
   }
 };
 
@@ -121,7 +119,6 @@ const CryptoScanner = () => {
       <h2 className="text-2xl font-bold mb-4">Cryptocurrency Futures Scanner</h2>
       <ExchangeTable data={data?.binance} exchangeName="Binance" />
       <ExchangeTable data={data?.bybit} exchangeName="Bybit" />
-      <ExchangeTable data={data?.mexc} exchangeName="MEXC" />
     </div>
   );
 };

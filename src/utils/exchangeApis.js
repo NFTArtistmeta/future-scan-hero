@@ -31,25 +31,3 @@ export const fetchBybitData = async () => {
     return [];
   }
 };
-
-export const fetchMEXCData = async () => {
-  try {
-    const response = await axios.get('https://contract.mexc.com/api/v1/contract/ticker');
-    console.log('MEXC raw data:', response.data); // Add this line for debugging
-    if (response.data && response.data.data) {
-      return response.data.data.map(item => ({
-        symbol: item.symbol,
-        lastPrice: item.last,
-        priceChangePercent: item.percentage,
-        volume: item.volume,
-        exchange: 'MEXC'
-      }));
-    } else {
-      console.error('Unexpected MEXC data structure:', response.data);
-      return [];
-    }
-  } catch (error) {
-    console.error('Error fetching MEXC data:', error);
-    return [];
-  }
-};
