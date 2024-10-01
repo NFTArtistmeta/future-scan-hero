@@ -17,14 +17,20 @@ const fetchCryptoData = async () => {
     'IOTA', 'BTT', 'RVN', 'MANA', 'HBAR', 'HOT', 'NANO', 'OMG', 'CRV', 'SAND', 'ANKR'
   ];
 
-  return pairs.map(symbol => ({
-    symbol: `${symbol}/USDT`,
-    price: +(Math.random() * 10000).toFixed(2),
-    longInterest: +(Math.random() * 100).toFixed(2),
-    shortInterest: +(Math.random() * 100).toFixed(2),
-    takeProfit: +(Math.random() * 20 + 1).toFixed(2), // 1-21% range
-    stopLoss: +(Math.random() * 10 + 1).toFixed(2), // 1-11% range
-  }));
+  return pairs.map(symbol => {
+    const price = +(Math.random() * 10000).toFixed(2);
+    const takeProfitPercentage = +(Math.random() * 20 + 1).toFixed(2); // 1-21% range
+    const stopLossPercentage = +(Math.random() * 10 + 1).toFixed(2); // 1-11% range
+    
+    return {
+      symbol: `${symbol}/USDT`,
+      price: price,
+      longInterest: +(Math.random() * 100).toFixed(2),
+      shortInterest: +(Math.random() * 100).toFixed(2),
+      takeProfit: +(price * (1 + takeProfitPercentage / 100)).toFixed(2),
+      stopLoss: +(price * (1 - stopLossPercentage / 100)).toFixed(2),
+    };
+  });
 };
 
 const CryptoScanner = () => {
@@ -59,8 +65,8 @@ const CryptoScanner = () => {
                 <TableCell>${crypto.price.toLocaleString()}</TableCell>
                 <TableCell>{crypto.longInterest}%</TableCell>
                 <TableCell>{crypto.shortInterest}%</TableCell>
-                <TableCell>{crypto.takeProfit}%</TableCell>
-                <TableCell>{crypto.stopLoss}%</TableCell>
+                <TableCell>${crypto.takeProfit.toLocaleString()}</TableCell>
+                <TableCell>${crypto.stopLoss.toLocaleString()}</TableCell>
                 <TableCell>
                   {crypto.longInterest > crypto.shortInterest ? (
                     <span className="text-green-500 flex items-center">
