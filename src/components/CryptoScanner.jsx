@@ -2,28 +2,15 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
-
-const BINANCE_API_KEY = 'ZCMU75SbcFqoGQQoskQ7M5JUYbpsUKga91wRItyHls6lfUs9nKaDYPaxZZ65x8Xg';
-
-const fetchCryptoData = async () => {
-  const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr', {
-    headers: {
-      'X-MBX-APIKEY': BINANCE_API_KEY
-    }
-  });
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-  return response.json();
-};
+import { fetchBinanceData, fetchBybitData, fetchMEXCData } from '../utils/exchangeApis';
 
 const calculatePositions = (price, volatility) => {
   const longEntry = price;
   const shortEntry = price;
-  const takeProfitLong = price * (1 + volatility * 10);  // Increased multiplier
-  const stopLossLong = price * (1 - volatility * 5);     // Increased multiplier
-  const takeProfitShort = price * (1 - volatility * 10); // Increased multiplier
-  const stopLossShort = price * (1 + volatility * 5);    // Increased multiplier
+  const takeProfitLong = price * (1 + volatility * 10);
+  const stopLossLong = price * (1 - volatility * 5);
+  const takeProfitShort = price * (1 - volatility * 10);
+  const stopLossShort = price * (1 + volatility * 5);
 
   return {
     longEntry: longEntry.toFixed(4),
@@ -35,17 +22,25 @@ const calculatePositions = (price, volatility) => {
   };
 };
 
+const fetchAllData = async () => {
+  const [binanceData, bybitData, mexcData] = await Promise.all([
+    fetchBinanceData(),
+    fetchBybitData(),
+    fetchMEXCData()
+  ]);
+  return [...binanceData, ...bybitData, ...mexcData];
+};
+
 const CryptoScanner = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['cryptoData'],
-    queryFn: fetchCryptoData,
-    refetchInterval: 30000, // Fetch every 30 seconds
+    queryFn: fetchAllData,
+    refetchInterval: 30000,
   });
 
   if (isLoading) return <div className="text-center py-10">Loading cryptocurrency data...</div>;
   if (error) return <div className="text-center py-10 text-red-500">Error: {error.message}</div>;
 
-  // Sort by volume
   const sortedData = data?.sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
 
   if (!sortedData || sortedData.length === 0) {
@@ -59,6 +54,7 @@ const CryptoScanner = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Exchange</TableHead>
               <TableHead>Symbol</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>24h Change</TableHead>
@@ -78,7 +74,8 @@ const CryptoScanner = () => {
               const positions = calculatePositions(price, volatility);
 
               return (
-                <TableRow key={crypto.symbol}>
+                <TableRow key={`${crypto.exchange}-${crypto.symbol}`}>
+                  <TableCell>{crypto.exchange}</TableCell>
                   <TableCell>{crypto.symbol}</TableCell>
                   <TableCell>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</TableCell>
                   <TableCell>
