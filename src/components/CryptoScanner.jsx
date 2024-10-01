@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 
 const BINANCE_API_KEY = 'ZCMU75SbcFqoGQQoskQ7M5JUYbpsUKga91wRItyHls6lfUs9nKaDYPaxZZ65x8Xg';
-const BINANCE_SECRET_KEY = 'LGj016u8xjgEpraotzJ2PgpDbR4yHheXAesOoFScGzmTNOZZKrbT4Z9o4qZMxfXw';
 
 const fetchCryptoData = async () => {
   const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr', {
@@ -21,18 +20,18 @@ const fetchCryptoData = async () => {
 const calculatePositions = (price, volatility) => {
   const longEntry = price;
   const shortEntry = price;
-  const takeProfitLong = price * (1 + volatility * 2);
-  const stopLossLong = price * (1 - volatility);
-  const takeProfitShort = price * (1 - volatility * 2);
-  const stopLossShort = price * (1 + volatility);
+  const takeProfitLong = price * (1 + volatility * 3);
+  const stopLossLong = price * (1 - volatility * 1.5);
+  const takeProfitShort = price * (1 - volatility * 3);
+  const stopLossShort = price * (1 + volatility * 1.5);
 
   return {
-    longEntry: longEntry.toFixed(2),
-    shortEntry: shortEntry.toFixed(2),
-    takeProfitLong: takeProfitLong.toFixed(2),
-    stopLossLong: stopLossLong.toFixed(2),
-    takeProfitShort: takeProfitShort.toFixed(2),
-    stopLossShort: stopLossShort.toFixed(2),
+    longEntry: longEntry.toFixed(4),
+    shortEntry: shortEntry.toFixed(4),
+    takeProfitLong: takeProfitLong.toFixed(4),
+    stopLossLong: stopLossLong.toFixed(4),
+    takeProfitShort: takeProfitShort.toFixed(4),
+    stopLossShort: stopLossShort.toFixed(4),
   };
 };
 
@@ -46,13 +45,10 @@ const CryptoScanner = () => {
   if (isLoading) return <div className="text-center py-10">Loading cryptocurrency data...</div>;
   if (error) return <div className="text-center py-10 text-red-500">Error: {error.message}</div>;
 
-  // Filter for USDT pairs and sort by volume
-  const filteredData = data
-    ?.filter(crypto => crypto.symbol.endsWith('USDT'))
-    .sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume))
-    .slice(0, 100); // Top 100 by volume
+  // Sort by volume
+  const sortedData = data?.sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume));
 
-  if (!filteredData || filteredData.length === 0) {
+  if (!sortedData || sortedData.length === 0) {
     return <div className="text-center py-10">No cryptocurrency data available.</div>;
   }
 
@@ -76,15 +72,15 @@ const CryptoScanner = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.map((crypto) => {
+            {sortedData.map((crypto) => {
               const price = parseFloat(crypto.lastPrice);
               const volatility = Math.abs(parseFloat(crypto.priceChangePercent) / 100);
               const positions = calculatePositions(price, volatility);
 
               return (
                 <TableRow key={crypto.symbol}>
-                  <TableCell>{crypto.symbol.replace('USDT', '')}</TableCell>
-                  <TableCell>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                  <TableCell>{crypto.symbol}</TableCell>
+                  <TableCell>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</TableCell>
                   <TableCell>
                     <span className={parseFloat(crypto.priceChangePercent) > 0 ? "text-green-500" : "text-red-500"}>
                       {parseFloat(crypto.priceChangePercent) > 0 ? (
