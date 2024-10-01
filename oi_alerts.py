@@ -13,7 +13,9 @@ exchange = ccxt.binance({
 def fetch_all_perpetual_pairs():
     try:
         markets = exchange.load_markets()
-        return [symbol for symbol, market in markets.items() if market['future'] and market['linear']]
+        perpetual_pairs = [symbol for symbol, market in markets.items() if market['future'] and market['linear']]
+        print(f"Fetched {len(perpetual_pairs)} perpetual contract pairs")
+        return perpetual_pairs
     except Exception as e:
         print(f"Error fetching perpetual pairs: {e}")
         return []
