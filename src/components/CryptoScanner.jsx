@@ -39,7 +39,7 @@ const CryptoScanner = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['cryptoData'],
     queryFn: fetchCryptoData,
-    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchInterval: 30000, // Updated to 30 seconds (30000 milliseconds)
   });
 
   if (isLoading) return <div className="text-center py-10">Loading cryptocurrency data...</div>;
